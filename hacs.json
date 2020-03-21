@@ -1,0 +1,6 @@
+{
+  "name": "Nexxt Solution (Nebula 1200) Device Tracker",
+  "content_in_root": false,
+  "domains": ["device_tracker"],
+  "homeassistant": "0.100.0"
+}

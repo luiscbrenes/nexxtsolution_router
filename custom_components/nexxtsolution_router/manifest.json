@@ -1,0 +1,8 @@
+{
+  "domain": "nexxtsolution_router",
+  "name": "NexxtSolution Router",
+  "documentation": "https://github.com/luiscbrenes-integrations/nexxtsolution_router",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@luiscbrenes"]
+}
