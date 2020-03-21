@@ -44,7 +44,7 @@ class NexxtSolutionDeviceScanner(DeviceScanner):
         """Initialize the scanner."""
 
         # encoding clear password
-        md5_result = hashlib.md5(config[CONF_PASSWORD])
+        md5_result = hashlib.md5(config[CONF_PASSWORD].encode())
 
         self.host = config[CONF_HOST]
         self.username = config[CONF_USERNAME]
@@ -79,7 +79,7 @@ class NexxtSolutionDeviceScanner(DeviceScanner):
         self.last_results = active_clients
 
         _LOGGER.debug(
-            "Active clients: %s",
+            "LCBA Active clients: %s",
             "\n".join(f"{client.mac} {client.name}" for client in active_clients),
         )
         return True
@@ -89,7 +89,9 @@ class NexxtSolutionDeviceScanner(DeviceScanner):
 
         Returns a list with all the devices known to the router DHCP server.
         """
-        _devices = json.loads(self._get_devices_response())
+        _json = self._get_devices_response()
+        _LOGGER.debug("LCBA Device response", _json)
+        _devices = json.loads(_json)
 
         devices = []
         for _device in _devices:
@@ -108,7 +110,7 @@ class NexxtSolutionDeviceScanner(DeviceScanner):
                 "Origin": f"http://{self.host}/login.html",
             }
 
-            _LOGGER.debug("Logging in")
+            _LOGGER.debug("LCBA Logging in")
             login_response = requests.post(
                 f"http://{self.host}/login/Auth",
                 data=[("username", self.username), ("password", self.password)],
@@ -125,15 +127,18 @@ class NexxtSolutionDeviceScanner(DeviceScanner):
                 seed(1)
                 rand = random()
                 device_response = requests.get(
-                    f"http://{host}/goform/getOnlineList?{rand}",
+                    f"http://{self.host}/goform/getOnlineList?{rand}",
                     headers=headers,
                     cookies=login_response.cookies,
                 )
 
-                return device_response.text
+                if not "<html" in device_response.text:
+                    return device_response.text
+                else:
+                    _LOGGER.debug(device_response)
             else:
-                _LOGGER.debug("Incorrect username and/or password")
+                _LOGGER.debug("LCBA Incorrect username and/or password")
         except requests.exceptions.ConnectionError:
-            _LOGGER.debug("Connection refused")
+            _LOGGER.debug("LCBA Connection refused")
 
         return "[]"
